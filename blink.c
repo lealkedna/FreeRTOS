@@ -7,11 +7,11 @@
 const uint led_pin_blue = 12;  // Pino do LED
 const uint buttonA = 5;        // Pino do Botão A
 
-// Filas para comunicação entre tarefas
-QueueHandle_t xButtonQueue;    // Fila entre Tarefa 1 e Tarefa 2
-QueueHandle_t xLedQueue;       // Fila entre Tarefa 2 e Tarefa 3
 
-// Estruturas para enviar dados através das filas
+QueueHandle_t xButtonQueue;    
+QueueHandle_t xLedQueue;       
+
+
 typedef struct {
     bool button_state;
 } ButtonEvent;
@@ -20,19 +20,19 @@ typedef struct {
     bool led_state;
 } LedEvent;
 
-// Tarefa 1: Leitura do Botão
+
 void vTask1(void *pvParameters) {
     bool last_current_state = false;
     ButtonEvent event;
     
     for(;;) {
-        // Lê o estado do botão
+        
         bool current_state = !gpio_get(buttonA);
         
         if (last_current_state != current_state) {
             event.button_state = current_state;
             
-            // Envia o estado do botão para a fila
+           
             if (xQueueSend(xButtonQueue, &event, portMAX_DELAY)) {
                 printf("Button State: %d sent to queue\n", current_state);
             }
@@ -43,20 +43,20 @@ void vTask1(void *pvParameters) {
     }
 }
 
-// Tarefa 2: Processamento do Estado do Botão
+
 void vTask2(void *pvParameters) {
     ButtonEvent received_event;
     LedEvent led_event;
     
     for(;;) {
-        // Recebe o evento da fila de botões
+       
         if (xQueueReceive(xButtonQueue, &received_event, portMAX_DELAY)) {
             printf("Button Pressed! State: %d\n", received_event.button_state);
             
-            // Prepara evento para o LED
+            
             led_event.led_state = received_event.button_state;
             
-            // Envia o comando para a fila do LED
+            
             if (xQueueSend(xLedQueue, &led_event, portMAX_DELAY)) {
                 printf("LED command sent to queue\n");
             }
@@ -64,12 +64,12 @@ void vTask2(void *pvParameters) {
     }
 }
 
-// Tarefa 3: Controle do LED
+
 void vTask3(void *pvParameters) {
     LedEvent led_event;
     
     for(;;) {
-        // Recebe o evento da fila de LED
+        
         if (xQueueReceive(xLedQueue, &led_event, portMAX_DELAY)) {
             gpio_put(led_pin_blue, led_event.led_state);
             
@@ -91,7 +91,7 @@ int setup(void) {
     gpio_init(led_pin_blue);
     gpio_set_dir(led_pin_blue, GPIO_OUT);
     
-    // Cria as filas
+    
     xButtonQueue = xQueueCreate(5, sizeof(ButtonEvent));
     xLedQueue = xQueueCreate(5, sizeof(LedEvent));
     
@@ -112,10 +112,10 @@ int main() {
     xTaskCreate(vTask2, "Button Process Task", 128, NULL, 2, NULL);
     xTaskCreate(vTask3, "LED Control Task", 128, NULL, 3, NULL);
 
-    // Iniciar o agendador do FreeRTOS
+    
     vTaskStartScheduler();
 
-    // O código não deve chegar aqui
+
     while(1);
     return 0;
 }
