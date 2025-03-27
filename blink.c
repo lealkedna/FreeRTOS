@@ -4,9 +4,8 @@
 #include "queue.h"
 #include <stdio.h>
 
-const uint led_pin_blue = 12;  // Pino do LED
-const uint buttonA = 5;        // Pino do Botão A
-
+const uint led_pin_blue = 12;  
+const uint buttonA = 5;        
 
 QueueHandle_t xButtonQueue;    
 QueueHandle_t xLedQueue;       
