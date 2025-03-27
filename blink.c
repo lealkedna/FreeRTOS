@@ -4,7 +4,7 @@
 #include "queue.h"
 #include <stdio.h>
 
-const uint led_pin_blue = 12;  
+const uint led_pin_blue = 13;  
 const uint buttonA = 5;        
 
 QueueHandle_t xButtonQueue;    
